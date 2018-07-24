@@ -104,10 +104,3 @@ workflows:
                 - master
           requires:
             - hold
-      - post-deploy:
-          filters:
-            branches:
-              only:
-                - master
-          requires:
-            - deploy
