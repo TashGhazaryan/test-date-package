@@ -53,7 +53,7 @@ jobs:
 
       - run:
           name: Authenticate with registry
-          command: npm adduser --registry=https//registry.npmjs.org/:_authToken=$npm_TOKEN
+          command: npm adduser --registry=https://registry.npmjs.org/:_authToken=$npm_TOKEN
 
       - run:
           name: Publishing package to npm
