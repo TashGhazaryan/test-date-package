@@ -1,0 +1,113 @@
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:8
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package-lock.json" }}
+          - v1-dependencies-
+
+      - run:
+          name: Installing node modules
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+
+      - persist_to_workspace:
+          root: "~"
+          paths:
+            - repo
+
+  test:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: "~"
+
+      - run:
+          name: Testing
+          command: npm test
+
+  deploy:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: "~"
+
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN"
+
+      - run:
+          name: Publishing package to npm
+          command: npm publish
+
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - prod
+      - test:
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - dev
+          requires:
+            - test
+      - post-deploy:
+          filters:
+            branches:
+              only:
+                - dev
+          requires:
+            - deploy
+  build_and_deploy_prod:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - prod
+      - test:
+          requires:
+            - build
+      - hold:
+          type: approval
+          requires:
+           - test
+      - deploy:
+          filters:
+            branches:
+              only:
+                - prod
+          requires:
+            - hold
+      - post-deploy:
+          filters:
+            branches:
+              only:
+                - prod
+          requires:
+            - deploy
