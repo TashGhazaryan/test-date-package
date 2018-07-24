@@ -40,6 +40,9 @@ jobs:
       - run:
           name: Testing
           command: npm test
+      - run:
+          name: print token
+          command: echo $npm_TOKEN
 
   deploy:
     <<: *defaults
