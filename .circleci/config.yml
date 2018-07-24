@@ -65,7 +65,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - prod
+                - master
       - test:
           requires:
             - build
@@ -83,13 +83,13 @@ workflows:
                 - dev
           requires:
             - deploy
-  build_and_deploy_prod:
+  build_and_deploy_master:
     jobs:
       - build:
           filters:
             branches:
               only:
-                - prod
+                - master
       - test:
           requires:
             - build
@@ -101,13 +101,13 @@ workflows:
           filters:
             branches:
               only:
-                - prod
+                - master
           requires:
             - hold
       - post-deploy:
           filters:
             branches:
               only:
-                - prod
+                - master
           requires:
             - deploy
